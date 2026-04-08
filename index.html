@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Void & Signal — Exhibition 2026</title>
+  <style>
+    /* =============================================
+       CONFIGURACIÓN GENERAL — edita aquí los textos
+       ============================================= */
+
+    /* Fuentes de Google */
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Sans:wght@300;400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0f;
+      --surface: #141415;
+      --border: #242426;
+      --text-primary: #ede8e0;
+      --text-secondary: #888;
+      --text-muted: #555;
+      --accent: #c8a96e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* =====================
+       ENCABEZADO
+       ===================== */
+    header {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+    }
+
+    /* Cambia el texto del subtítulo pequeño */
+    header .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 400;
+    }
+
+    /* Cambia el título principal aquí en el HTML */
+    header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 300;
+      color: var(--text-primary);
+      margin-top: 10px;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+
+    /* Cambia el subtítulo principal aquí en el HTML */
+    header .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 1.2rem;
+      letter-spacing: 0.08em;
+    }
+
+    header .divider {
+      width: 1px;
+      height: 40px;
+      background: var(--border);
+      margin: 2rem auto 0;
+    }
+
+    /* =====================
+       GALERÍA GRID
+       ===================== */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2px;
+      padding: 2px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--surface);
+      aspect-ratio: 4 / 5;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      filter: brightness(0.88) saturate(0.85);
+    }
+
+    .card:hover img {
+      transform: scale(1.05);
+      filter: brightness(1) saturate(1);
+    }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.5rem;
+    }
+
+    .card:hover .card-overlay { opacity: 1; }
+
+    .card-label span {
+      display: block;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .card-label strong {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: var(--text-primary);
+    }
+
+    /* =====================
+       MODAL
+       ===================== */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+      pointer-events: none;
+      transition: background 0.45s ease;
+    }
+
+    .modal-bg.open {
+      background: rgba(0,0,0,0.9);
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 3px;
+      max-width: 860px;
+      width: 100%;
+      display: flex;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px) scale(0.97);
+      transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1);
+      max-height: 90vh;
+    }
+
+    .modal-bg.open .modal {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-img {
+      flex: 0 0 50%;
+      overflow: hidden;
+      min-height: 360px;
+      background: var(--bg);
+    }
+
+    .modal-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-body {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .modal-tag {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+
+    .modal-year {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .modal-story {
+      font-size: 14px;
+      line-height: 1.85;
+      color: var(--text-secondary);
+      flex: 1;
+    }
+
+    .modal-hr {
+      width: 36px;
+      height: 1px;
+      background: var(--border);
+      margin: 1.75rem 0;
+    }
+
+    .modal-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: 0.5px solid var(--border);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, border-color 0.2s;
+      z-index: 10;
+    }
+
+    .btn-close:hover { color: var(--text-primary); border-color: #666; }
+
+    /* =====================
+       FOOTER
+       ===================== */
+    footer {
+      text-align: center;
+      padding: 4rem 2rem;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* =====================
+       RESPONSIVE
+       ===================== */
+    @media (max-width: 640px) {
+      .modal { flex-direction: column; }
+      .modal-img { flex: none; min-height: 220px; max-height: 260px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     ENCABEZADO — edita los textos entre las etiquetas
+     ============================================================ -->
+<header>
+  <p class="eyebrow">Galería de Arte · 2026</p>         <!-- Subtítulo pequeño arriba -->
+  <h1>Void &amp; Signal</h1>                            <!-- TÍTULO PRINCIPAL -->
+  <p class="subtitle">Una exploración del espacio entre la forma y el vacío</p> <!-- Subtítulo largo -->
+  <div class="divider"></div>
+</header>
+
+
+<!-- ============================================================
+     GALERÍA
+     Cada <div class="card"> es una obra.
+     Campos a editar por obra:
+       data-tag      → categoría/tipo (ej: "Fotografía")
+       data-title    → título de la obra
+       data-year     → año
+       data-story    → descripción larga (aparece en el modal)
+       data-meta     → línea de metadatos al pie del modal
+       src=""        → ruta de tu imagen (ej: "images/obra1.jpg")
+       alt=""        → descripción para accesibilidad
+     ============================================================ -->
+<main class="gallery">
+
+  <!-- OBRA 1 -->
+  <div class="card"
+       data-tag="Fotografía"
+       data-title="Horizonte Efímero"
+       data-year="2024"
+       data-story="Tomada al amanecer en las salinas del norte, esta imagen captura el instante exacto en que la luz no pertenece ni a la noche ni al día. El fotógrafo esperó 40 días para que las condiciones atmosféricas fueran las correctas."
+       data-meta="Serie: Umbrales de luz · Impresión pigmento sobre papel algodón · Edición 2/5">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800" alt="Horizonte Efímero" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Fotografía</span>
+        <strong>Horizonte Efímero</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 2 -->
+  <div class="card"
+       data-tag="Pintura Digital"
+       data-title="Tensión Interna"
+       data-year="2025"
+       data-story="Esta obra nació de un proceso de escucha: el artista tradujo grabaciones de campo de una fábrica abandonada en patrones de color y línea. Cada mancha representa un ciclo de máquina; cada vacío, un turno sin trabajadores."
+       data-meta="Serie: Arqueología Industrial · Óleo sobre lino · Único">
+    <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800" alt="Tensión Interna" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Pintura Digital</span>
+        <strong>Tensión Interna</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 3 -->
+  <div class="card"
+       data-tag="Escultura"
+       data-title="Masa Suspendida"
+       data-year="2023"
+       data-story="Bloque de mármol de Carrara intervenido con herramientas de precisión CNC durante tres meses. El resultado desafía la percepción del peso: una forma que parece flotar aunque pese 240 kilos."
+       data-meta="Serie: Paradojas Físicas · Mármol Carrara · Piezas únicas">
+    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Masa Suspendida" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Escultura</span>
+        <strong>Masa Suspendida</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 4 -->
+  <div class="card"
+       data-tag="Grabado"
+       data-title="Líneas de Falla"
+       data-year="2024"
+       data-story="Cada trazo corresponde a un evento sísmico registrado entre 1900 y 2023. La densidad de líneas revela lo que el tiempo no puede mostrar: la acumulación de tensión que hace visible la arquitectura invisible del suelo."
+       data-meta="Serie: Registros Sísmicos · Aguatinta sobre Hahnemühle · Edición 1/5">
+    <img src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?w=800" alt="Líneas de Falla" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Grabado</span>
+        <strong>Líneas de Falla</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 5 -->
+  <div class="card"
+       data-tag="Instalación"
+       data-title="Ruido Blanco"
+       data-year="2025"
+       data-story="Las líneas verticales finas están interrumpidas en intervalos precisos que corresponden a momentos de apagón global de internet registrados durante una década. Lo que parece una estética de cuadrícula es, en realidad, un mapa de la desconexión colectiva."
+       data-meta="Serie: Elegías de Infraestructura · Inkjet de archivo · Edición 3/7">
+    <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800" alt="Ruido Blanco" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Instalación</span>
+        <strong>Ruido Blanco</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 6 -->
+  <div class="card"
+       data-tag="Video Still"
+       data-title="Ahora Continuo"
+       data-year="2025"
+       data-story="Un fotograma extraído de un video en bucle de 40 horas de una habitación vacía mientras la luz cambia de artificial a natural y vuelve. Este fotograma fue seleccionado porque es el único momento en el que ambas fuentes de luz alcanzan la paridad perfecta."
+       data-meta="Serie: Estudios de Duración · Impresión pigmento desde video 8K">
+    <img src="https://images.unsplash.com/photo-1518655048521-f130df041f66?w=800" alt="Ahora Continuo" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Video Still</span>
+        <strong>Ahora Continuo</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 7 -->
+  <div class="card"
+       data-tag="Collage"
+       data-title="Geografía Personal"
+       data-year="2023"
+       data-story="Construida a partir de 300 mapas topográficos descartados de la Biblioteca Nacional, esta obra reorganiza el territorio según la memoria afectiva del artista. Los ríos no siguen la geografía real; siguen el recuerdo de haberlos cruzado."
+       data-meta="Serie: Cartografías del yo · Collage sobre tabla · Única">
+    <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800" alt="Geografía Personal" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Collage</span>
+        <strong>Geografía Personal</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 8 -->
+  <div class="card"
+       data-tag="Dibujo Algorítmico"
+       data-title="Jardín Estocástico"
+       data-year="2024"
+       data-story="Diez mil iteraciones de una regla simple: una línea solo puede continuar si no se cruza consigo misma. La forma resultante no es diseñada ni aleatoria — es la figura de una restricción encontrándose con la posibilidad infinita."
+       data-meta="Serie: Formas Emergentes · Tinta plóter sobre algodón · Única">
+    <img src="https://images.unsplash.com/photo-1534796636912-3b82a1f31fef?w=800" alt="Jardín Estocástico" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Dibujo Algorítmico</span>
+        <strong>Jardín Estocástico</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBRA 9 -->
+  <div class="card"
+       data-tag="Fotograma"
+       data-title="Objeto Sin Nombre"
+       data-year="2026"
+       data-story="Un objeto de origen desconocido colocado sobre papel fotográfico y expuesto a luz ultravioleta difusa. El artista ha rehusado identificar el objeto. Los espectadores están invitados a traer sus propias interpretaciones a la silueta."
+       data-meta="Serie: Cosas Sin Nombre · Fotograma en gelatina de plata · 60×60 cm">
+    <img src="https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?w=800" alt="Objeto Sin Nombre" />
+    <div class="card-overlay">
+      <div class="card-label">
+        <span>Fotograma</span>
+        <strong>Objeto Sin Nombre</strong>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+
+<!-- ============================================================
+     FOOTER — edita el texto aquí
+     ============================================================ -->
+<footer>
+  <p>© 2026 Void &amp; Signal · Galería de Arte Contemporáneo</p>   <!-- Tu nombre o galería -->
+  <p style="margin-top:6px;">Todos los derechos reservados</p>
+</footer>
+
+
+<!-- ============================================================
+     MODAL (no necesitas editar esto)
+     ============================================================ -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal">
+    <div class="modal-img"><img id="mImg" src="" alt="" /></div>
+    <div class="modal-body">
+      <p class="modal-tag" id="mTag"></p>
+      <h2 class="modal-title" id="mTitle"></h2>
+      <p class="modal-year" id="mYear"></p>
+      <p class="modal-story" id="mStory"></p>
+      <div class="modal-hr"></div>
+      <p class="modal-meta" id="mMeta"></p>
+    </div>
+    <button class="btn-close" id="btnClose" aria-label="Cerrar">✕</button>
+  </div>
+</div>
+
+
+<script>
+  // Abre el modal con los datos del data-* de cada card
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.getElementById('mImg').src   = card.querySelector('img').src;
+      document.getElementById('mImg').alt   = card.querySelector('img').alt;
+      document.getElementById('mTag').textContent   = card.dataset.tag;
+      document.getElementById('mTitle').textContent = card.dataset.title;
+      document.getElementById('mYear').textContent  = card.dataset.year;
+      document.getElementById('mStory').textContent = card.dataset.story;
+      document.getElementById('mMeta').textContent  = card.dataset.meta;
+      document.getElementById('modalBg').classList.add('open');
+    });
+  });
+
+  // Cierra el modal
+  document.getElementById('btnClose').addEventListener('click', close);
+  document.getElementById('modalBg').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalBg')) close();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  function close() {
+    document.getElementById('modalBg').classList.remove('open');
+  }
+</script>
+
+</body>
+</html>
